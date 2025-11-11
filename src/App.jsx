@@ -1,5 +1,5 @@
 import React from 'react'
-import { ThemeProvider } from './context/ThemeContext'
+import { ThemeProvider } from './Context/ThemeContext'
 import Topbar from './components/Topbar'
 import Sidebar from './components/Sidebar'
 import UserProfile from './components/UserProfile'
