@@ -1,5 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+a.active hr {
+  display: block;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -110,11 +118,4 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+
