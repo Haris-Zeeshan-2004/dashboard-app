@@ -7,7 +7,7 @@ import { ThemeProvider } from "./Context/ThemeContext"
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter basename="/dashboard-app">
+    <BrowserRouter>
       <ThemeProvider>
         <App />
       </ThemeProvider>
