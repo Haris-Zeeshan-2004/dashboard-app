@@ -1,58 +1,52 @@
-import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { assets } from "@/assets/assets";
+import { useTheme } from "@/Context/ThemeContext";
+import axios from "axios";
+import { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Hero = () => {
-    const [profile, setProfile] = useState({ fullName: "", email: "", bio: "" });
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-
-
-    useEffect(() => {
-        setTimeout(() => {
-            setProfile({
-                fullName: "Haris Zeeshan",
-                email: "haris@example.com",
-                bio: "Hello! I am a frontend developer.",
-            });
-            setLoading(false);
-        }, 1000);
-    }, []);
-
-
-    useEffect(() => {
-        const savedData = localStorage.getItem("userData");
-        if (savedData) {
-            try {
-                const parsed = JSON.parse(savedData);
-                setProfile({
-                    fullName: parsed.fullName || "",
-                    email: parsed.email || "",
-                    bio: parsed.bio || "",
-                });
-            } catch (err) {
-                console.error("Error parsing localStorage data", err);
-            }
-        }
-    }, []);
-
-
-    const handleChange = (e) => setProfile({ ...profile, [e.target.name]: e.target.value });
-
-
-    const handleSubmit = (e) => {
+    const navigate = useNavigate();
+    const { backendurl } = useTheme()
+    const [State, setState] = useState("Sign Up");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const onSubmitHandler = async (e) => {
         e.preventDefault();
-        setSaving(true);
-        localStorage.setItem("userData", JSON.stringify(profile));
-        setTimeout(() => {
-            setSaving(false);
-            toast.success("Profile saved successfully!");
-        }, 500);
+        try {
+            axios.defaults.withCredentials = true;
+
+            if (State === "Sign Up") {
+                const { data } = await axios.post(`${backendurl}/api/auth/register`, {
+                    name,
+                    email,
+                    password,
+                });
+
+                if (data.success) {
+                    toast.success("Register successfully!.Please Login");
+                } else {
+                    toast.error(data.message || "Something went wrong");
+                }
+            } else {
+                const { data } = await axios.post(`${backendurl}/api/auth/Login`, {
+                    email,
+                    password,
+                });
+
+                if (data.success) {
+                    toast.success("Logged in successfully!");
+                    navigate("/profile");
+                } else {
+                    toast.error(data.message || "Invalid credentials");
+                }
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message);
+        }
     };
-
-    if (loading) return <div className="text-center py-10 dark:text-white">Loading...</div>;
-
     return (
         <div className="flex flex-col sm:flex-row py-2 gap-2 dark:text-white">
 
@@ -80,64 +74,81 @@ const Hero = () => {
 
 
             <div className="w-full sm:w-10/12 flex items-center justify-center py-10 sm:py-0">
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg w-full max-w-md transition-colors duration-300"
-                >
-                    <h2 className="text-2xl font-semibold text-center mb-6 dark:text-white">
-                        User Information
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg w-full max-w-md transition-colors duration-300">
+                    <h2 className="text-3xl font-semibold text-center mb-4 dark:text-white">
+                        {State === "Sign Up" ? "Create Account" : "Login"}
                     </h2>
+                    <p className="text-center mb-6 dark:text-indigo-300">
+                        {State === "Sign Up"
+                            ? "Create your account"
+                            : "Login to your Account"}
+                    </p>
+                    <form onSubmit={onSubmitHandler}>
+                        {State === "Sign Up" && (
+                            <div className="mb-4 flex items-center gap-3 px-4 py-2.5 rounded-full bg-gray-100 border border-gray-200">
+                                <img src={assets.person_icon} alt="" className="w-5 h-5" />
+                                <input
+                                    onChange={(e) => setName(e.target.value)}
+                                    value={name}
+                                    type="text"
+                                    placeholder="Full Name"
+                                    required
+                                    className="text-gray-800 bg-transparent w-full outline-none placeholder:text-gray-400"
+                                />
+                            </div>
+                        )}
 
+                        <div className="mb-4 flex items-center gap-3 px-4 py-2.5 rounded-full bg-gray-100 border border-gray-200">
+                            <img src={assets.mail_icon} alt="" className="w-5 h-5" />
+                            <input
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                type="email"
+                                placeholder="Email"
+                                required
+                                className="text-gray-800 bg-transparent w-full outline-none placeholder:text-gray-400"
+                            />
+                        </div>
+                        <div className="mb-4 flex items-center gap-3 px-4 py-2.5 rounded-full bg-gray-100 border border-gray-200">
+                            <img src={assets.lock_icon} alt="" className="w-5 h-5" />
+                            <input
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                type="password"
+                                placeholder="Password"
+                                required
+                                className="text-gray-800 bg-transparent w-full outline-none placeholder:text-gray-400"
+                            />
+                        </div>
 
-                    <div className="mb-4">
-                        <label className="block text-gray-700 dark:text-gray-200 font-medium mb-1">Full Name</label>
-                        <input
-                            type="text"
-                            name="fullName"
-                            placeholder="Enter your name"
-                            value={profile.fullName}
-                            onChange={handleChange}
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-300"
-                            required
-                        />
-                    </div>
-
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 dark:text-gray-200 font-medium mb-1">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="Enter your email"
-                            value={profile.email}
-                            onChange={handleChange}
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-300"
-                            required
-                        />
-                    </div>
-
-
-                    <div className="mb-6">
-                        <label className="block text-gray-700 dark:text-gray-200 font-medium mb-1">Bio</label>
-                        <textarea
-                            name="bio"
-                            placeholder="Write something about yourself..."
-                            value={profile.bio}
-                            onChange={handleChange}
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-300"
-                            rows="3"
-                        ></textarea>
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-400"
-                    >
-                        {saving ? "Saving..." : "Save"}
-                    </button>
-                </form>
+                        <button
+                            className="w-full font-semibold text- bg-black text-white py-2 rounded-full hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-400 "
+                        >
+                            {State}
+                        </button>
+                    </form>
+                    {State === "Sign Up" ? (
+                        <p className="text-gray-600 text-center dark:text-white text-xs mt-4">
+                            Already have an account?{"  "}
+                            <span
+                                onClick={() => setState("Login")}
+                                className="text-blue-400 cursor-pointer underline"
+                            >
+                                Login here
+                            </span>
+                        </p>
+                    ) : (
+                        <p className="text-gray-600 text-center dark:text-white text-xs mt-4">
+                            Don't have an account?{"  "}
+                            <span
+                                onClick={() => setState("Sign Up")}
+                                className="text-blue-400 cursor-pointer underline"
+                            >
+                                Sign Up
+                            </span>
+                        </p>
+                    )}
+                </div>
             </div>
 
 

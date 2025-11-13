@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from "react"
 const ThemeContext = createContext()
 
 export const ThemeProvider = ({ children }) => {
+    const backendurl = import.meta.env.VITE_BACKEND_URL;
     const [theme, setTheme] = useState(() => {
 
         if (typeof window !== "undefined") {
@@ -23,7 +24,7 @@ export const ThemeProvider = ({ children }) => {
     }
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ThemeContext.Provider value={{ theme, toggleTheme,backendurl }}>
             {children}
         </ThemeContext.Provider>
     )
